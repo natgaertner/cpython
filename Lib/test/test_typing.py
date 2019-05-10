@@ -27,7 +27,6 @@ import weakref
 
 from test import mod_generics_cache
 
-
 class BaseTestCase(TestCase):
 
     def assertIsSubclass(self, cls, class_or_tuple, msg=None):
@@ -1809,9 +1808,13 @@ class GetTypeHintTests(BaseTestCase):
         # FIXME: This currently exposes a bug in typing. Cached forward references
         # don't account for the case where there are multiple types of the same
         # name coming from different modules in the same program.
-        mgc_hints = {'default_a': Optional[mod_generics_cache.A],
-                     'default_b': Optional[mod_generics_cache.B]}
-        self.assertEqual(gth(mod_generics_cache), mgc_hints)
+        from test import module_type_cache
+        class Z:
+            x: Optional['A'] = None
+
+        z_a = gth(Z)['x']
+        mtc_a = gth(module_type_cache)['default_a']
+        self.assertNotEqual(mgc_a, z_a)
 
     def test_get_type_hints_classes(self):
         self.assertEqual(gth(ann_module.C),  # gth will find the right globalns
